@@ -2,13 +2,11 @@
 
 ## Description
 
-Ce projet implémente un réseau de neurones à deux couches entièrement à partir de zéro, en NumPy uniquement, sans recourir à une librairie de deep learning comme TensorFlow ou PyTorch. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le tout est présenté dans un notebook pédagogique qui détaille chaque étape, suit les dimensions des matrices à chaque calcul et visualise les résultats.
+Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
 
 ## Problème
 
-Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Ce projet répond à cette limite en ajoutant une couche cachée, qui permet au modèle d'apprendre une frontière de décision non linéaire. La question concrète posée tout au long du notebook est donc la suivante:
-
-Une couche cachée apporte-t-elle réellement un gain sur un problème de classification binaire, si oui, à quelles conditions?
+Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Le premier notebook explore si l'ajout d'une couche cachée permet de dépasser cette limite, et à quelles conditions de capacité. Le second notebook répond à une question plus ambitieuse, comment reconnaître automatiquement des chiffres manuscrits parmi dix classes possibles, un problème où la profondeur du réseau, le choix des activations et la formulation multi-classes deviennent indispensables.
 
 ## Installation et lancement
 
@@ -17,34 +15,43 @@ Le projet ne nécessite que quelques librairies scientifiques classiques.
 ```bash
 git clone <url-du-repo>
 cd first-neural-network-from-scratch
-pip install numpy pandas matplotlib plotly notebook
-jupyter notebook first_neural_network.ipynb
+pip install numpy pandas matplotlib plotly scikit-learn notebook
+jupyter notebook
 ```
 
-Le fichier `classification_data.csv` doit rester à la racine, car le notebook le charge directement. Il suffit ensuite d'exécuter les cellules dans l'ordre pour reproduire l'entraînement et l'ensemble des visualisations.
+Pour le premier notebook, le fichier `classification_data.csv` doit rester à la racine du projet. Pour le second, le jeu MNIST est téléchargé automatiquement via scikit-learn au premier lancement. Il suffit d'exécuter les cellules de chaque notebook dans l'ordre pour reproduire l'entraînement et les visualisations associées.
+
+| Notebook | Fichier |
+|----------|---------|
+| Réseau à une couche cachée | `first_neural_network.ipynb` |
+| Réseau profond multi-classes | `deep-neural nework.ipynb` |
 
 ## Ce qui a été réalisé
 
-Le réseau suit une architecture 4 entrées vers 3 neurones cachés vers 1 sortie, biais inclus, soit 15 paramètres au total. Les briques suivantes ont été codées à la main, la fonction d'activation sigmoïde et sa dérivée, l'initialisation aléatoire des poids, la propagation avant à travers les deux couches, la fonction de coût d'entropie croisée binaire, la rétropropagation via la règle de la chaîne et la boucle d'entraînement par descente de gradient. Le notebook ajoute aussi une comparaison directe avec une régression logistique, une visualisation 3D des prédictions et de la frontière de décision, ainsi qu'une étude de l'effet de la taille de la couche cachée.
+### Notebook 1 — Réseau à deux couches (classification binaire)
+
+Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètres au total. Implémentation manuelle de la sigmoïde et de sa dérivée, de l'initialisation aléatoire des poids, de la propagation avant, de l'entropie croisée binaire, de la rétropropagation et de la boucle d'entraînement. Le notebook inclut une comparaison directe avec une régression logistique, des visualisations 3D de la frontière de décision et une étude de l'effet de la taille de la couche cachée.
+
+### Notebook 2 — Réseau profond (classification multi-classes MNIST)
+
+Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres. Passage à ReLU dans les couches cachées, softmax en sortie et entropie croisée catégorielle. Chargement et prétraitement de MNIST (normalisation, encodage one-hot, séparation train/test sur un sous-ensemble de 10 000 images), initialisation He adaptée à ReLU, rétropropagation sur trois couches de poids, évaluation sur jeu de test, matrice de confusion, précision par classe et démonstration de prédiction sur des images individuelles.
 
 ## Motivations des choix
 
-La sigmoïde a été retenue pour les deux couches, car elle reste l'activation la plus simple à dériver et la plus parlante quand on découvre la rétropropagation, même si ce n'est pas le choix le plus performant en pratique. L'initialisation des poids se fait avec de petites valeurs aléatoires, pour éviter que la sigmoïde ne sature dès le départ et n'annule les gradients. La graine aléatoire est fixée à 42, afin de garantir des résultats reproductibles. Enfin, le même jeu de données que la régression logistique (issue d'une précédente analyse) est utilisé volontairement, ce qui rend la comparaison entre les deux modèles parfaitement équitable.
+Le premier notebook retient la sigmoïde partout, car elle reste la plus simple à dériver quand on découvre la rétropropagation, même si ce n'est pas le choix le plus performant en pratique. Le même jeu de données que la régression logistique est utilisé volontairement pour rendre la comparaison équitable, et la graine aléatoire est fixée à 42 pour garantir la reproductibilité.
+
+Le second notebook adopte les choix qu'un ingénieur machine learning appliquerait sur un vrai problème. ReLU remplace la sigmoïde dans les couches cachées pour limiter la saturation des gradients, l'initialisation He compense la variance introduite par ReLU, softmax convertit les scores en probabilités sur dix classes, et un sous-ensemble de MNIST est retenu pour garder des temps d'entraînement raisonnables en mode batch pur sur CPU. La séparation train/test dès ce stade permet de mesurer la généralisation, ce qui n'était pas encore le cas dans le premier notebook.
 
 ## Solution apportée
 
-La solution est un réseau de neurones complet et lisible, où chaque opération mathématique est explicitée et reliée à sa formule. La descente de gradient utilise un taux d'apprentissage de 1.0 sur 2000 itérations, en mode batch sur les 200 exemples. La structure du code, fonctions séparées pour la propagation avant, le coût, la rétropropagation et l'entraînement, permet de modifier facilement un élément isolé, comme la taille de la couche cachée, pour observer son impact.
+Les deux notebooks partagent la même philosophie, chaque opération mathématique est explicitée, reliée à sa formule et accompagnée du suivi des dimensions matricielles. Le code est découpé en fonctions distinctes (propagation avant, coût, rétropropagation, entraînement), ce qui permet de modifier un composant isolé, comme la taille d'une couche cachée ou le taux d'apprentissage, pour observer son impact sans toucher au reste de la pipeline.
 
 ## Résultats obtenus
 
-Avec trois neurones cachés, le réseau plafonne à 64,50 % de précision, soit nettement en dessous des 97 % de la régression logistique sur le même jeu de données. Ce résultat contre-intuitif s'explique par une couche cachée trop étroite, qui ne dispose pas d'assez de capacité pour exploiter sa non-linéarité et reste bloquée dans un minimum médiocre. L'étude sur la taille de la couche cachée confirme ce diagnostic, les configurations à un, deux ou trois neurones restent à 64,50 %, tandis que cinq neurones atteignent 97,50 % et dix neurones se maintiennent à ce niveau. La leçon principale est donc que la profondeur seule ne suffit pas, la largeur de la couche cachée est un facteur déterminant pour qu'un réseau dépasse un modèle linéaire.
+Sur le jeu de classification binaire, un réseau à trois neurones cachés plafonne à 64,50 % de précision, nettement en dessous des 97 % de la régression logistique. Ce résultat contre-intuitif s'explique par une couche cachée trop étroite, qui reste bloquée dans un minimum médiocre. L'étude sur la taille de la couche confirme ce diagnostic, les configurations à un, deux ou trois neurones restent à 64,50 %, tandis qu'à partir de cinq neurones le réseau atteint 97,50 %.
+
+Sur MNIST, le réseau profond atteint 86,25 % de précision sur le jeu de test après 50 époques, avec 86,16 % sur l'entraînement, ce qui indique une généralisation correcte sans surapprentissage marqué sur ce sous-ensemble. Les chiffres 0 et 1 sont les mieux reconnus (97,6 % et 94,9 %), tandis que le 5 reste le plus difficile (68,2 %), ce qui se reflète dans la matrice de confusion. Ces résultats restent en deçà des performances obtenues avec des frameworks optimisés et l'ensemble du dataset, mais ils valident que l'implémentation from scratch fonctionne sur un problème réel à dix classes.
 
 ## Prochaines étapes
 
-Plusieurs pistes permettraient d'améliorer le projet :
-
-- [ ] remplacer la sigmoïde des couches cachées par ReLU ou tanh pour accélérer l'apprentissage et atténuer la saturation des gradients
-- [ ] ajouter des couches supplémentaires pour passer à un véritable réseau profond, et introduire la classification multi-classes avec une sortie softmax
-- [ ] Il serait aussi pertinent de séparer les données en jeu d'entraînement et jeu de test pour mesurer la généralisation
-- [ ] ajouter une régularisation pour limiter le surapprentissage
-- [ ] remplacer la descente de gradient batch par une version par mini-lots afin de mieux passer à l'échelle sur des jeux de données plus volumineux.
+Plusieurs pistes permettraient d'améliorer et de prolonger le projet. Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels. L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges, et le passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité. Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU, constituerait l'étape naturelle pour expérimenter rapidement des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images.
