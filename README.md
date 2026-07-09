@@ -54,4 +54,9 @@ Sur MNIST, le réseau profond atteint 86,25 % de précision sur le jeu de test a
 
 ## Prochaines étapes
 
-Plusieurs pistes permettraient d'améliorer et de prolonger le projet. Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels. L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges, et le passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité. Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU, constituerait l'étape naturelle pour expérimenter rapidement des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images.
+Plusieurs pistes permettraient d'améliorer et de prolonger le projet. 
+
+- [ ] Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels.
+- [ ] L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges
+- [ ] Passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité
+- [ ] Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU, constituerait l'étape naturelle pour expérimenter rapidement des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images
