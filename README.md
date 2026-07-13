@@ -34,7 +34,9 @@ Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètr
 
 ### Notebook 2 — Réseau profond (classification multi-classes MNIST)
 
-Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres. Passage à ReLU dans les couches cachées, softmax en sortie et entropie croisée catégorielle. Chargement et prétraitement de MNIST (normalisation, encodage one-hot, séparation train/test sur un sous-ensemble de 10 000 images), initialisation He adaptée à ReLU, rétropropagation sur trois couches de poids, évaluation sur jeu de test, matrice de confusion, précision par classe et démonstration de prédiction sur des images individuelles.
+Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres.Le modèle utilise la fonction d'activation ReLU (Rectified Linear Unit) dans les couches cachées afin d'améliorer l'apprentissage des caractéristiques, puis une fonction softmax en sortie pour convertir les scores du réseau en probabilités de classification. L'entraînement repose sur la fonction de perte d'entropie croisée catégorielle, couramment utilisée pour mesurer l'écart entre les prédictions du modèle et les classes attendues.
+
+Chargement et prétraitement de MNIST (normalisation, encodage one-hot, séparation train/test sur un sous-ensemble de 10 000 images), initialisation He adaptée à ReLU, rétropropagation sur trois couches de poids, évaluation sur jeu de test, matrice de confusion, précision par classe et démonstration de prédiction sur des images individuelles.
 
 ## Motivations des choix
 
