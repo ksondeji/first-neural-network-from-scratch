@@ -36,7 +36,9 @@ Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètr
 
 Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres.Le modèle utilise la fonction d'activation ReLU (Rectified Linear Unit) dans les couches cachées afin d'améliorer l'apprentissage des caractéristiques, puis une fonction softmax en sortie pour convertir les scores du réseau en probabilités de classification. L'entraînement repose sur la fonction de perte d'entropie croisée catégorielle, couramment utilisée pour mesurer l'écart entre les prédictions du modèle et les classes attendues.
 
-Chargement et prétraitement de MNIST (normalisation, encodage one-hot, séparation train/test sur un sous-ensemble de 10 000 images), initialisation He adaptée à ReLU, rétropropagation sur trois couches de poids, évaluation sur jeu de test, matrice de confusion, précision par classe et démonstration de prédiction sur des images individuelles.
+Le jeu de données MNIST, composé d'images de chiffres manuscrits, est chargé puis prétraité : les valeurs des pixels sont normalisées, les étiquettes sont converties au format one-hot (une représentation binaire des classes) et les données sont séparées en ensembles d'entraînement et de test sur un sous-ensemble de 10 000 images. Les poids du réseau sont initialisés avec la méthode de He, spécialement conçue pour les réseaux utilisant ReLU, avant d'être optimisés par rétropropagation, l'algorithme qui ajuste les poids pour réduire l'erreur de prédiction.
+
+Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide d'une matrice de confusion, qui visualise les erreurs de classification, ainsi que de la précision par classe. Enfin, une démonstration illustre les prédictions du réseau sur des images individuelles.
 
 ## Motivations des choix
 
