@@ -2,7 +2,9 @@
 
 ## Description
 
-Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
+Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch dans un premier temps. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
+
+Ensuite nous allons améliorer la qualité de notre réseau de neurones en utilisant Pytorch.
 
 ## Problème
 
