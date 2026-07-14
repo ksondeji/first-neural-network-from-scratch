@@ -2,7 +2,9 @@
 
 ## Description
 
-Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
+Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch dans un premier temps. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
+
+Ensuite nous allons améliorer la qualité de notre réseau de neurones en utilisant Pytorch.
 
 ## Problème
 
@@ -34,7 +36,11 @@ Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètr
 
 ### Notebook 2 — Réseau profond (classification multi-classes MNIST)
 
-Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres. Passage à ReLU dans les couches cachées, softmax en sortie et entropie croisée catégorielle. Chargement et prétraitement de MNIST (normalisation, encodage one-hot, séparation train/test sur un sous-ensemble de 10 000 images), initialisation He adaptée à ReLU, rétropropagation sur trois couches de poids, évaluation sur jeu de test, matrice de confusion, précision par classe et démonstration de prédiction sur des images individuelles.
+Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres.Le modèle utilise la fonction d'activation ReLU (Rectified Linear Unit) dans les couches cachées afin d'améliorer l'apprentissage des caractéristiques, puis une fonction softmax en sortie pour convertir les scores du réseau en probabilités de classification. L'entraînement repose sur la fonction de perte d'entropie croisée catégorielle, couramment utilisée pour mesurer l'écart entre les prédictions du modèle et les classes attendues.
+
+Le jeu de données MNIST, composé d'images de chiffres manuscrits, est chargé puis prétraité : les valeurs des pixels sont normalisées, les étiquettes sont converties au format one-hot (une représentation binaire des classes) et les données sont séparées en ensembles d'entraînement et de test sur un sous-ensemble de 10 000 images. Les poids du réseau sont initialisés avec la méthode de He, spécialement conçue pour les réseaux utilisant ReLU, avant d'être optimisés par rétropropagation, l'algorithme qui ajuste les poids pour réduire l'erreur de prédiction.
+
+Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide d'une matrice de confusion, qui visualise les erreurs de classification, ainsi que de la précision par classe. Enfin, une démonstration illustre les prédictions du réseau sur des images individuelles.
 
 ## Motivations des choix
 
@@ -54,4 +60,9 @@ Sur MNIST, le réseau profond atteint 86,25 % de précision sur le jeu de test a
 
 ## Prochaines étapes
 
-Plusieurs pistes permettraient d'améliorer et de prolonger le projet. Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels. L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges, et le passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité. Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU, constituerait l'étape naturelle pour expérimenter rapidement des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images.
+Plusieurs pistes permettraient d'améliorer et de prolonger le projet. 
+
+- [ ] Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels.
+- [ ] L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges
+- [ ] Passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité
+- [ ] Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU, constituerait l'étape naturelle pour expérimenter rapidement des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images
