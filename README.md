@@ -34,13 +34,16 @@ Pour le premier notebook, le fichier `classification_data.csv` doit rester à la
 
 Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètres au total. Implémentation manuelle de la sigmoïde et de sa dérivée, de l'initialisation aléatoire des poids, de la propagation avant, de l'entropie croisée binaire, de la rétropropagation et de la boucle d'entraînement. Le notebook inclut une comparaison directe avec une régression logistique, des visualisations 3D de la frontière de décision et une étude de l'effet de la taille de la couche cachée.
 
-### Notebook 2 — Réseau profond (classification multi-classes MNIST)
+### Notebook 2 — Réseau profond avec NumPy (classification multi-classes MNIST)
 
 Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres.Le modèle utilise la fonction d'activation ReLU (Rectified Linear Unit) dans les couches cachées afin d'améliorer l'apprentissage des caractéristiques, puis une fonction softmax en sortie pour convertir les scores du réseau en probabilités de classification. L'entraînement repose sur la fonction de perte d'entropie croisée catégorielle, couramment utilisée pour mesurer l'écart entre les prédictions du modèle et les classes attendues.
 
 Le jeu de données MNIST, composé d'images de chiffres manuscrits, est chargé puis prétraité : les valeurs des pixels sont normalisées, les étiquettes sont converties au format one-hot (une représentation binaire des classes) et les données sont séparées en ensembles d'entraînement et de test sur un sous-ensemble de 10 000 images. Les poids du réseau sont initialisés avec la méthode de He, spécialement conçue pour les réseaux utilisant ReLU, avant d'être optimisés par rétropropagation, l'algorithme qui ajuste les poids pour réduire l'erreur de prédiction.
 
 Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide d'une matrice de confusion, qui visualise les erreurs de classification, ainsi que de la précision par classe. Enfin, une démonstration illustre les prédictions du réseau sur des images individuelles.
+
+### Notebook 3 — Réseau profond avec PyTorch
+
 
 ## Motivations des choix
 
