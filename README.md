@@ -47,7 +47,7 @@ Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide
 
 Même problème et même architecture que le notebook NumPy (784 → 128 → 64 → 10 sur le sous-ensemble MNIST de 10 000 images), mais l'implémentation bascule entièrement sur PyTorch. Le réseau est défini via `nn.Module`, les données passent par un `DataLoader` (mini-lots de taille 64, mélange automatique), et la boucle d'entraînement suit le schéma standard : `zero_grad`, forward, `loss.backward()`, `optimizer.step()`.
 
-La différence centrale avec la version NumPy est l'autograd : la rétropropagation manuelle (plus de 25 lignes de dérivées) disparaît au profit d'un seul appel à `backward()`. `CrossEntropyLoss` combine softmax et entropie croisée, les couches `Linear` ajoutent les biais par défaut, et le code utile passe d'environ 150 lignes à environ 50, tout en restant prêt pour le GPU. Changer d'optimiseur (SGD vers Adam) ne demande qu'une ligne, là où NumPy imposerait de réécrire la mise à jour des poids.
+La différence centrale avec la version NumPy est l'autograd : la rétropropagation manuelle (plus de 25 lignes de dérivées) disparaît au profit d'un seul appel à `backward()`. `CrossEntropyLoss` qui combine softmax et entropie croisée. Les couches `Linear` ajoutent les biais par défaut, et le code utile passe d'environ 150 lignes à environ 50, tout en restant prêt pour le GPU. Changer d'optimiseur (SGD vers Adam) ne demande qu'une ligne, là où NumPy imposerait de réécrire la mise à jour des poids.
 
 Sur le même jeu de données, le modèle atteint environ 96 % de précision en test, contre ~86 % en batch complet NumPy, grâce notamment aux mini-lots et aux biais.
 
@@ -78,5 +78,5 @@ Plusieurs pistes permettraient d'améliorer et de prolonger le projet.
 - [X] Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU
 - [ ] Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels.
 - [ ] L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges
-- [ ] Passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité
+- [X] Passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité
 - [ ]  Expérimenter des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images
