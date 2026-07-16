@@ -17,16 +17,17 @@ Le projet ne nécessite que quelques librairies scientifiques classiques.
 ```bash
 git clone <url-du-repo>
 cd first-neural-network-from-scratch
-pip install numpy pandas matplotlib plotly scikit-learn notebook
+pip install numpy pandas matplotlib plotly scikit-learn torch notebook
 jupyter notebook
 ```
 
-Pour le premier notebook, le fichier `classification_data.csv` doit rester à la racine du projet. Pour le second, le jeu MNIST est téléchargé automatiquement via scikit-learn au premier lancement. Il suffit d'exécuter les cellules de chaque notebook dans l'ordre pour reproduire l'entraînement et les visualisations associées.
+Pour le premier notebook, le fichier `classification_data.csv` doit rester à la racine du projet. Pour les notebooks MNIST, le jeu est téléchargé automatiquement via scikit-learn au premier lancement. Il suffit d'exécuter les cellules de chaque notebook dans l'ordre pour reproduire l'entraînement et les visualisations associées.
 
 | Notebook | Fichier |
 |----------|---------|
 | Réseau à une couche cachée | `first_neural_network.ipynb` |
-| Réseau profond multi-classes | `deep-neural nework.ipynb` |
+| Réseau profond multi-classes (NumPy) | `deep-neural_network_numpy.ipynb` |
+| Réseau profond multi-classes (PyTorch) | `deep-neural_network_pytorch.ipynb` |
 
 ## Ce qui a été réalisé
 
@@ -44,6 +45,11 @@ Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide
 
 ### Notebook 3 — Réseau profond avec PyTorch
 
+Même problème et même architecture que le notebook NumPy (784 → 128 → 64 → 10 sur le sous-ensemble MNIST de 10 000 images), mais l'implémentation bascule entièrement sur PyTorch. Le réseau est défini via `nn.Module`, les données passent par un `DataLoader` (mini-lots de taille 64, mélange automatique), et la boucle d'entraînement suit le schéma standard : `zero_grad`, forward, `loss.backward()`, `optimizer.step()`.
+
+La différence centrale avec la version NumPy est l'autograd : la rétropropagation manuelle (plus de 25 lignes de dérivées) disparaît au profit d'un seul appel à `backward()`. `CrossEntropyLoss` combine softmax et entropie croisée, les couches `Linear` ajoutent les biais par défaut, et le code utile passe d'environ 150 lignes à environ 50, tout en restant prêt pour le GPU. Changer d'optimiseur (SGD vers Adam) ne demande qu'une ligne, là où NumPy imposerait de réécrire la mise à jour des poids.
+
+Sur le même jeu de données, le modèle atteint environ 96 % de précision en test, contre ~86 % en batch complet NumPy, grâce notamment aux mini-lots et aux biais.
 
 ## Motivations des choix
 
@@ -51,15 +57,19 @@ Le premier notebook retient la sigmoïde partout, car elle reste la plus simple 
 
 Le second notebook adopte les choix qu'un ingénieur machine learning appliquerait sur un vrai problème. ReLU remplace la sigmoïde dans les couches cachées pour limiter la saturation des gradients, l'initialisation He compense la variance introduite par ReLU, softmax convertit les scores en probabilités sur dix classes, et un sous-ensemble de MNIST est retenu pour garder des temps d'entraînement raisonnables en mode batch pur sur CPU. La séparation train/test dès ce stade permet de mesurer la généralisation, ce qui n'était pas encore le cas dans le premier notebook.
 
+Le troisième notebook conserve volontairement le même problème et la même architecture pour isoler l'apport du framework. L'objectif n'est plus de dériver les gradients à la main, mais de montrer comment PyTorch automatise ces étapes tout en laissant le contrôle sur le modèle, les données et l'optimiseur.
+
 ## Solution apportée
 
-Les deux notebooks partagent la même philosophie, chaque opération mathématique est explicitée, reliée à sa formule et accompagnée du suivi des dimensions matricielles. Le code est découpé en fonctions distinctes (propagation avant, coût, rétropropagation, entraînement), ce qui permet de modifier un composant isolé, comme la taille d'une couche cachée ou le taux d'apprentissage, pour observer son impact sans toucher au reste de la pipeline.
+Les deux premiers notebooks partagent la même philosophie : chaque opération mathématique est explicitée, reliée à sa formule et accompagnée du suivi des dimensions matricielles. Le code est découpé en fonctions distinctes (propagation avant, coût, rétropropagation, entraînement), ce qui permet de modifier un composant isolé, comme la taille d'une couche cachée ou le taux d'apprentissage, pour observer son impact sans toucher au reste de la pipeline. Le notebook PyTorch reprend ensuite ce même modèle avec les abstractions du framework (`nn.Module`, autograd, `DataLoader`), pour montrer le passage du from scratch à une implémentation plus productive.
 
 ## Résultats obtenus
 
 Sur le jeu de classification binaire, un réseau à trois neurones cachés plafonne à 64,50 % de précision, nettement en dessous des 97 % de la régression logistique. Ce résultat contre-intuitif s'explique par une couche cachée trop étroite, qui reste bloquée dans un minimum médiocre. L'étude sur la taille de la couche confirme ce diagnostic, les configurations à un, deux ou trois neurones restent à 64,50 %, tandis qu'à partir de cinq neurones le réseau atteint 97,50 %.
 
-Sur MNIST, le réseau profond atteint 86,25 % de précision sur le jeu de test après 50 époques, avec 86,16 % sur l'entraînement, ce qui indique une généralisation correcte sans surapprentissage marqué sur ce sous-ensemble. Les chiffres 0 et 1 sont les mieux reconnus (97,6 % et 94,9 %), tandis que le 5 reste le plus difficile (68,2 %), ce qui se reflète dans la matrice de confusion. Ces résultats restent en deçà des performances obtenues avec des frameworks optimisés et l'ensemble du dataset, mais ils valident que l'implémentation from scratch fonctionne sur un problème réel à dix classes.
+Sur MNIST, le réseau profond NumPy atteint 86,25 % de précision sur le jeu de test après 50 époques, avec 86,16 % sur l'entraînement, ce qui indique une généralisation correcte sans surapprentissage marqué sur ce sous-ensemble. Les chiffres 0 et 1 sont les mieux reconnus (97,6 % et 94,9 %), tandis que le 5 reste le plus difficile (68,2 %), ce qui se reflète dans la matrice de confusion.
+
+Avec PyTorch, la même architecture sur le même sous-ensemble atteint environ 96 % de précision en test. Le gain vient surtout du passage aux mini-lots, de l'ajout des biais et d'une boucle d'entraînement plus proche des pratiques standards, tout en confirmant que la migration conserve le bon comportement du modèle avec nettement moins de code.
 
 ## Prochaines étapes
 
