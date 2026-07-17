@@ -66,7 +66,7 @@ Avec le CNN, sur le même sous-ensemble et le même protocole, la précision de 
 
 ## Points forts et limites du CNN (cas MNIST)
 
-Points forts : les convolutions respectent la géométrie locale des chiffres, le partage de filtres apprend des strokes réutilisables, et le modèle extrait une hiérarchie de features (bords → parties de chiffres → classe) plus adaptée aux images qu'un vecteur plat de 784 pixels.
+Points forts : les convolutions respectent la géométrie locale des chiffres, le partage de filtres apprend des traits réutilisables, et le modèle extrait une hiérarchie de features (bords → parties de chiffres → classe) plus adaptée aux images qu'un vecteur plat de 784 pixels.
 
 Limites : MNIST est déjà un benchmark facile, le gain absolu reste donc borné, une CNN standard n'est pas invariante aux fortes rotations ou changements d'échelle sans augmentation, elle reste plus coûteuse à exécuter sur CPU, et ce n'est pas le bon outil pour des données tabulaires sans structure spatiale.
 
