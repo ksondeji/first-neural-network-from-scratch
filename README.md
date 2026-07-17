@@ -2,13 +2,13 @@
 
 ## Description
 
-Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch dans un premier temps. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en deux notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
+Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch dans un premier temps. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
 
-Ensuite nous allons améliorer la qualité de notre réseau de neurones en utilisant Pytorch.
+Ensuite nous améliorons la qualité du modèle avec PyTorch, d'abord via un réseau fully connected, puis via un réseau convolutionnel mieux adapté aux images.
 
 ## Problème
 
-Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Le premier notebook explore si l'ajout d'une couche cachée permet de dépasser cette limite, et à quelles conditions de capacité. Le second notebook répond à une question plus ambitieuse, comment reconnaître automatiquement des chiffres manuscrits parmi dix classes possibles, un problème où la profondeur du réseau, le choix des activations et la formulation multi-classes deviennent indispensables.
+Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Le premier notebook explore si l'ajout d'une couche cachée permet de dépasser cette limite, et à quelles conditions de capacité. Les notebooks suivants répondent à une question plus ambitieuse, comment reconnaître automatiquement des chiffres manuscrits parmi dix classes possibles, un problème où la profondeur, le framework et enfin l'architecture convolutionnelle deviennent décisifs.
 
 ## Installation et lancement
 
@@ -28,6 +28,7 @@ Pour le premier notebook, le fichier `classification_data.csv` doit rester à la
 | Réseau à une couche cachée | `first_neural_network.ipynb` |
 | Réseau profond multi-classes (NumPy) | `deep-neural_network_numpy.ipynb` |
 | Réseau profond multi-classes (PyTorch) | `deep-neural_network_pytorch.ipynb` |
+| Réseau convolutionnel (CNN) | `deep-neural_network_cnn.ipynb` |
 
 ## Ce qui a été réalisé
 
@@ -37,46 +38,44 @@ Architecture 4 entrées vers 3 neurones cachés vers 1 sortie, soit 15 paramètr
 
 ### Notebook 2 — Réseau profond avec NumPy (classification multi-classes MNIST)
 
-Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres.Le modèle utilise la fonction d'activation ReLU (Rectified Linear Unit) dans les couches cachées afin d'améliorer l'apprentissage des caractéristiques, puis une fonction softmax en sortie pour convertir les scores du réseau en probabilités de classification. L'entraînement repose sur la fonction de perte d'entropie croisée catégorielle, couramment utilisée pour mesurer l'écart entre les prédictions du modèle et les classes attendues.
-
-Le jeu de données MNIST, composé d'images de chiffres manuscrits, est chargé puis prétraité : les valeurs des pixels sont normalisées, les étiquettes sont converties au format one-hot (une représentation binaire des classes) et les données sont séparées en ensembles d'entraînement et de test sur un sous-ensemble de 10 000 images. Les poids du réseau sont initialisés avec la méthode de He, spécialement conçue pour les réseaux utilisant ReLU, avant d'être optimisés par rétropropagation, l'algorithme qui ajuste les poids pour réduire l'erreur de prédiction.
-
-Les performances du modèle sont ensuite évaluées sur le jeu de test à l'aide d'une matrice de confusion, qui visualise les erreurs de classification, ainsi que de la précision par classe. Enfin, une démonstration illustre les prédictions du réseau sur des images individuelles.
+Architecture 784 entrées vers 128 neurones cachés vers 64 neurones cachés vers 10 sorties, soit environ 109 000 paramètres. Le modèle utilise la fonction d'activation ReLU dans les couches cachées, puis une fonction softmax en sortie. L'entraînement repose sur l'entropie croisée catégorielle. Le jeu MNIST est chargé puis prétraité (normalisation, one-hot, split train/test sur 10 000 images). Les poids sont initialisés avec He, puis optimisés par rétropropagation. Les performances sont évaluées via matrice de confusion et précision par classe.
 
 ### Notebook 3 — Réseau profond avec PyTorch
 
-Même problème et même architecture que le notebook NumPy (784 → 128 → 64 → 10 sur le sous-ensemble MNIST de 10 000 images), mais l'implémentation bascule entièrement sur PyTorch. Le réseau est défini via `nn.Module`, les données passent par un `DataLoader` (mini-lots de taille 64, mélange automatique), et la boucle d'entraînement suit le schéma standard : `zero_grad`, forward, `loss.backward()`, `optimizer.step()`.
+Même problème et même architecture que le notebook NumPy (784 → 128 → 64 → 10 sur le sous-ensemble MNIST de 10 000 images), mais l'implémentation bascule entièrement sur PyTorch. Le réseau est défini via `nn.Module`, les données passent par un `DataLoader` (mini-lots de taille 64), et la boucle d'entraînement suit le schéma standard : `zero_grad`, forward, `loss.backward()`, `optimizer.step()`. Sur le même jeu de données, le modèle atteint environ 96 % de précision en test, contre ~86 % en batch complet NumPy.
 
-La différence centrale avec la version NumPy est l'autograd : la rétropropagation manuelle (plus de 25 lignes de dérivées) disparaît au profit d'un seul appel à `backward()`. `CrossEntropyLoss` qui combine softmax et entropie croisée. Les couches `Linear` ajoutent les biais par défaut, et le code utile passe d'environ 150 lignes à environ 50, tout en restant prêt pour le GPU. Changer d'optimiseur (SGD vers Adam) ne demande qu'une ligne, là où NumPy imposerait de réécrire la mise à jour des poids.
+### Notebook 4 — Réseau convolutionnel (CNN)
 
-Sur le même jeu de données, le modèle atteint environ 96 % de précision en test, contre ~86 % en batch complet NumPy, grâce notamment aux mini-lots et aux biais.
+Même problème MNIST, mêmes données et même protocole d'entraînement que le notebook PyTorch, mais l'architecture devient convolutionnelle : Conv(16) → ReLU → MaxPool → Conv(32) → ReLU → MaxPool → Flatten → FC(128) → FC(10). Le notebook réentraîne aussi le MLP fully connected en baseline pour une comparaison head-to-head, visualise les feature maps, les matrices de confusion et discute les points forts comme les limites du CNN dans ce cas précis.
 
 ## Motivations des choix
 
-Le premier notebook retient la sigmoïde partout, car elle reste la plus simple à dériver quand on découvre la rétropropagation, même si ce n'est pas le choix le plus performant en pratique. Le même jeu de données que la régression logistique est utilisé volontairement pour rendre la comparaison équitable, et la graine aléatoire est fixée à 42 pour garantir la reproductibilité.
-
-Le second notebook adopte les choix qu'un ingénieur machine learning appliquerait sur un vrai problème. ReLU remplace la sigmoïde dans les couches cachées pour limiter la saturation des gradients, l'initialisation He compense la variance introduite par ReLU, softmax convertit les scores en probabilités sur dix classes, et un sous-ensemble de MNIST est retenu pour garder des temps d'entraînement raisonnables en mode batch pur sur CPU. La séparation train/test dès ce stade permet de mesurer la généralisation, ce qui n'était pas encore le cas dans le premier notebook.
-
-Le troisième notebook conserve volontairement le même problème et la même architecture pour isoler l'apport du framework. L'objectif n'est plus de dériver les gradients à la main, mais de montrer comment PyTorch automatise ces étapes tout en laissant le contrôle sur le modèle, les données et l'optimiseur.
+Le premier notebook retient la sigmoïde partout, car elle reste la plus simple à dériver quand on découvre la rétropropagation. Le second notebook adopte ReLU, He et softmax pour un vrai problème multi-classes. Le troisième conserve volontairement la même architecture pour isoler l'apport du framework. Le quatrième change enfin l'architecture, pas le framework, afin d'isoler l'apport du biais inductif spatial des convolutions sur des images.
 
 ## Solution apportée
 
-Les deux premiers notebooks partagent la même philosophie : chaque opération mathématique est explicitée, reliée à sa formule et accompagnée du suivi des dimensions matricielles. Le code est découpé en fonctions distinctes (propagation avant, coût, rétropropagation, entraînement), ce qui permet de modifier un composant isolé, comme la taille d'une couche cachée ou le taux d'apprentissage, pour observer son impact sans toucher au reste de la pipeline. Le notebook PyTorch reprend ensuite ce même modèle avec les abstractions du framework (`nn.Module`, autograd, `DataLoader`), pour montrer le passage du from scratch à une implémentation plus productive.
+Les notebooks NumPy explicitent chaque opération mathématique et suivent les dimensions matricielles. Le notebook PyTorch montre ensuite comment le framework automatise autograd, batching et définition de modèle. Le notebook CNN garde cette même boucle PyTorch et remplace uniquement l'extracteur de features dense par des filtres partagés, ce qui rend la comparaison MLP vs CNN parfaitement contrôlée.
 
 ## Résultats obtenus
 
-Sur le jeu de classification binaire, un réseau à trois neurones cachés plafonne à 64,50 % de précision, nettement en dessous des 97 % de la régression logistique. Ce résultat contre-intuitif s'explique par une couche cachée trop étroite, qui reste bloquée dans un minimum médiocre. L'étude sur la taille de la couche confirme ce diagnostic, les configurations à un, deux ou trois neurones restent à 64,50 %, tandis qu'à partir de cinq neurones le réseau atteint 97,50 %.
+Sur le jeu de classification binaire, un réseau à trois neurones cachés plafonne à 64,50 % de précision, nettement en dessous des 97 % de la régression logistique, tandis qu'à partir de cinq neurones le réseau atteint 97,50 %.
 
-Sur MNIST, le réseau profond NumPy atteint 86,25 % de précision sur le jeu de test après 50 époques, avec 86,16 % sur l'entraînement, ce qui indique une généralisation correcte sans surapprentissage marqué sur ce sous-ensemble. Les chiffres 0 et 1 sont les mieux reconnus (97,6 % et 94,9 %), tandis que le 5 reste le plus difficile (68,2 %), ce qui se reflète dans la matrice de confusion.
+Sur MNIST, le réseau profond NumPy atteint 86,25 % de précision sur le jeu de test. Avec PyTorch, la même architecture fully connected monte à environ 96 % grâce aux mini-lots et aux biais.
 
-Avec PyTorch, la même architecture sur le même sous-ensemble atteint environ 96 % de précision en test. Le gain vient surtout du passage aux mini-lots, de l'ajout des biais et d'une boucle d'entraînement plus proche des pratiques standards, tout en confirmant que la migration conserve le bon comportement du modèle avec nettement moins de code.
+Avec le CNN, sur le même sous-ensemble et le même protocole, la précision de test atteint 98,10 %, contre 95,85 % pour le MLP PyTorch réentraîné dans le même notebook, soit un gain d'environ +2,25 points. Le CNN mémorise aussi le train à 100 %, mais généralise mieux, ce qui confirme que le vrai levier ici est la structure spatiale des filtres, pas seulement la capacité brute du modèle.
+
+## Points forts et limites du CNN (cas MNIST)
+
+Points forts : les convolutions respectent la géométrie locale des chiffres, le partage de filtres apprend des strokes réutilisables, et le modèle extrait une hiérarchie de features (bords → parties de chiffres → classe) plus adaptée aux images qu'un vecteur plat de 784 pixels.
+
+Limites : MNIST est déjà un benchmark facile, le gain absolu reste donc borné, une CNN standard n'est pas invariante aux fortes rotations ou changements d'échelle sans augmentation, elle reste plus coûteuse à exécuter sur CPU, et ce n'est pas le bon outil pour des données tabulaires sans structure spatiale.
 
 ## Prochaines étapes
 
-Plusieurs pistes permettraient d'améliorer et de prolonger le projet. 
-
-- [X] Migrer vers PyTorch ou Keras, avec différenciation automatique et accélération GPU
-- [ ] Entraîner le réseau profond sur l'intégralité des 70 000 images MNIST et augmenter le nombre d'époques devrait rapprocher les performances des benchmarks usuels.
-- [ ] L'ajout d'une régularisation L2 ou de dropout limiterait le surapprentissage sur des architectures plus larges
-- [X] Passage à la descente de gradient par mini-lots améliorerait à la fois la stabilité et la scalabilité
-- [ ]  Expérimenter des architectures plus complexes, comme des réseaux convolutionnels mieux adaptés aux images
+- [X] Migrer vers PyTorch, avec différenciation automatique et accélération GPU
+- [X] Passage à la descente de gradient par mini-lots
+- [X] Expérimenter une architecture convolutionnelle mieux adaptée aux images
+- [ ] Entraîner sur l'intégralité des 70 000 images MNIST
+- [ ] Ajouter une régularisation L2 ou du dropout
+- [ ] Ajouter de l'augmentation de données (translations, petites rotations)
+- [ ] Tester BatchNorm et des CNN plus profondes, ou du transfer learning sur des jeux plus difficiles
