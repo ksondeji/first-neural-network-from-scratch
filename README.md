@@ -4,11 +4,11 @@
 
 Ce dépôt propose une implémentation de réseaux de neurones entièrement à partir de zéro, en NumPy uniquement, sans recourir à TensorFlow ni PyTorch dans un premier temps. L'objectif est de comprendre en profondeur la mécanique interne d'un réseau, en codant manuellement la propagation avant, la rétropropagation du gradient et la descente de gradient. Le travail est réparti en notebooks complémentaires, le premier pose les fondations sur un problème de classification binaire simple, le second étend ces briques à un réseau profond multi-classes sur des données réelles.
 
-Ensuite nous améliorons la qualité du modèle avec PyTorch, d'abord via un réseau fully connected, puis via un réseau convolutionnel mieux adapté aux images.
+Ensuite nous améliorons la qualité du modèle avec PyTorch, d'abord via un réseau fully connected, puis via un réseau convolutionnel mieux adapté aux images, et enfin via un benchmark de régularisation (L2 et Dropout) pour tester la généralisation.
 
 ## Problème
 
-Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Le premier notebook explore si l'ajout d'une couche cachée permet de dépasser cette limite, et à quelles conditions de capacité. Les notebooks suivants répondent à une question plus ambitieuse, comment reconnaître automatiquement des chiffres manuscrits parmi dix classes possibles, un problème où la profondeur, le framework et enfin l'architecture convolutionnelle deviennent décisifs.
+Une régression logistique ne sait tracer qu'une frontière de décision linéaire, ce qui la limite dès que les classes ne sont pas séparables par un simple plan. Le premier notebook explore si l'ajout d'une couche cachée permet de dépasser cette limite, et à quelles conditions de capacité. Les notebooks suivants répondent à une question plus ambitieuse, comment reconnaître automatiquement des chiffres manuscrits parmi dix classes possibles, un problème où la profondeur, le framework, l'architecture convolutionnelle et la régularisation deviennent décisifs.
 
 ## Installation et lancement
 
@@ -29,6 +29,7 @@ Pour le premier notebook, le fichier `classification_data.csv` doit rester à la
 | Réseau profond multi-classes (NumPy) | `deep-neural_network_numpy.ipynb` |
 | Réseau profond multi-classes (PyTorch) | `deep-neural_network_pytorch.ipynb` |
 | Réseau convolutionnel (CNN) | `deep-neural_network_cnn.ipynb` |
+| Benchmark L2 / Dropout | `deep-neural_network_regularization.ipynb` |
 
 ## Ce qui a été réalisé
 
@@ -48,13 +49,17 @@ Même problème et même architecture que le notebook NumPy (784 → 128 → 64 
 
 Même problème MNIST, mêmes données et même protocole d'entraînement que le notebook PyTorch, mais l'architecture devient convolutionnelle : Conv(16) → ReLU → MaxPool → Conv(32) → ReLU → MaxPool → Flatten → FC(128) → FC(10). Le notebook réentraîne aussi le MLP fully connected en baseline pour une comparaison head-to-head, visualise les feature maps, les matrices de confusion et discute les points forts comme les limites du CNN dans ce cas précis.
 
+### Notebook 5 — Benchmark de régularisation (L2 et Dropout)
+
+Même backbone CNN, mêmes données et même protocole, puis comparaison contrôlée de quatre variantes : CNN classique, CNN + L2 (`weight_decay=1e-4`), CNN + Dropout (`p=0.5` sur la couche dense), et CNN + L2 + Dropout. L'objectif est de mesurer si une pénalité de poids plus douce et/ou l'extinction aléatoire de neurones améliorent la généralisation, via la précision test et l'écart train/test.
+
 ## Motivations des choix
 
-Le premier notebook retient la sigmoïde partout, car elle reste la plus simple à dériver quand on découvre la rétropropagation. Le second notebook adopte ReLU, He et softmax pour un vrai problème multi-classes. Le troisième conserve volontairement la même architecture pour isoler l'apport du framework. Le quatrième change enfin l'architecture, pas le framework, afin d'isoler l'apport du biais inductif spatial des convolutions sur des images.
+Le premier notebook retient la sigmoïde partout, car elle reste la plus simple à dériver quand on découvre la rétropropagation. Le second notebook adopte ReLU, He et softmax pour un vrai problème multi-classes. Le troisième conserve volontairement la même architecture pour isoler l'apport du framework. Le quatrième change l'architecture, pas le framework, afin d'isoler l'apport du biais inductif spatial des convolutions. Le cinquième fixe l'architecture CNN et ne fait varier que la régularisation, pour isoler l'effet du L2 et du Dropout sur le surapprentissage.
 
 ## Solution apportée
 
-Les notebooks NumPy explicitent chaque opération mathématique et suivent les dimensions matricielles. Le notebook PyTorch montre ensuite comment le framework automatise autograd, batching et définition de modèle. Le notebook CNN garde cette même boucle PyTorch et remplace uniquement l'extracteur de features dense par des filtres partagés, ce qui rend la comparaison MLP vs CNN parfaitement contrôlée.
+Les notebooks NumPy explicitent chaque opération mathématique et suivent les dimensions matricielles. Le notebook PyTorch montre ensuite comment le framework automatise autograd, batching et définition de modèle. Le notebook CNN remplace l'extracteur dense par des filtres partagés. Le notebook de régularisation reprend ce CNN et injecte le L2 dans l'optimiseur (`weight_decay`) et le Dropout dans la tête dense (`nn.Dropout`), sans changer le reste de la pipeline, ce qui rend le benchmark directement comparable.
 
 ## Résultats obtenus
 
@@ -62,7 +67,20 @@ Sur le jeu de classification binaire, un réseau à trois neurones cachés plafo
 
 Sur MNIST, le réseau profond NumPy atteint 86,25 % de précision sur le jeu de test. Avec PyTorch, la même architecture fully connected monte à environ 96 % grâce aux mini-lots et aux biais.
 
-Avec le CNN, sur le même sous-ensemble et le même protocole, la précision de test atteint 98,10 %, contre 95,85 % pour le MLP PyTorch réentraîné dans le même notebook, soit un gain d'environ +2,25 points. Le CNN mémorise aussi le train à 100 %, mais généralise mieux, ce qui confirme que le vrai levier ici est la structure spatiale des filtres, pas seulement la capacité brute du modèle.
+Avec le CNN, sur le même sous-ensemble et le même protocole, la précision de test atteint 98,10 %, contre 95,85 % pour le MLP PyTorch réentraîné dans le même notebook, soit un gain d'environ +2,25 points.
+
+Sur le benchmark de régularisation (30 époques, même CNN), les résultats finaux sont les suivants :
+
+| Variante | Train | Test | Gap |
+|----------|-------|------|-----|
+| CNN | 100,00 % | 98,25 % | +1,75 % |
+| CNN + L2 | 100,00 % | 98,10 % | +1,90 % |
+| CNN + Dropout | 99,78 % | 98,00 % | +1,78 % |
+| CNN + L2 + Dropout | 99,80 % | 97,95 % | +1,85 % |
+
+Dans ce cas précis, le CNN sans régularisation reste le meilleur en test final. Le L2 réduit bien légèrement la magnitude moyenne des poids, et le Dropout atteint le meilleur pic test pendant l'entraînement (98,40 %), mais ni L2 ni Dropout n'améliorent le score final sur ce sous-ensemble MNIST déjà très propre. 
+
+Pour résumér, sur un benchmark facile et un modèle déjà bien adapté aux images, une régularisation trop forte peut légèrement underfit au lieu d'aider.
 
 ## Points forts et limites du CNN (cas MNIST)
 
@@ -75,7 +93,7 @@ Limites : MNIST est déjà un benchmark facile, le gain absolu reste donc borné
 - [X] Migrer vers PyTorch, avec différenciation automatique et accélération GPU
 - [X] Passage à la descente de gradient par mini-lots
 - [X] Expérimenter une architecture convolutionnelle mieux adaptée aux images
+- [X] Ajouter une régularisation L2 ou du dropout
 - [ ] Entraîner sur l'intégralité des 70 000 images MNIST
-- [ ] Ajouter une régularisation L2 ou du dropout
 - [ ] Ajouter de l'augmentation de données (translations, petites rotations)
-- [ ] Tester BatchNorm et des CNN plus profondes, ou du transfer learning sur des jeux plus difficiles
+- [ ] Tester BatchNorm et des CNN plus profonds, ou du transfer learning sur des jeux plus difficiles
